@@ -5,47 +5,41 @@
 </head>
 
 <body>
+    <form method="post" name="hiddenform" action="<%= callback %>">
+        <input type="hidden" name="<%= type %>" value="<%= token %>">
+        <input type="hidden" name="RelayState" value="<%= RelayState %>">
+        <noscript>
+            <p>
+                Script is disabled. Click Submit to continue.
+            </p>
+            <input type="submit" value="Submit">
+        </noscript>
+    </form>
 
-    <% asyncAssertions.forEach(function(assertion, i) { %>
-        <form  action="<%= assertion.acsUrl %>" method="post" target="<%= 'iframe'+i %>">
-            <input type="hidden" name="<%= type %>" value="<%= token %>">
-            <input type="hidden" name="RelayState" value="<%= RelayState %>">
-            <noscript>
-                <p>
-                    Script is disabled. Click Submit to continue.
-                </p>
-                <input type="submit" value="Submit">
-            </noscript>
-        </form>
+    <script
+    src="http://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
 
-        <!-- when the form is submitted, the server response will appear in this iframe -->
-        <iframe style="display: none" name="<%= 'iframe'+i %>"></iframe>
-        <% }); %>
+    <script language="javascript" type="text/javascript">
+        var form = document.forms[document.forms.length - 1];
+        var asyncAssertions = <%- JSON.stringify(asyncAssertions) %>;
 
-            <form method="post" name="hiddenform" action="<%= callback %>">
-                <input type="hidden" name="<%= type %>" value="<%= token %>">
-                <input type="hidden" name="RelayState" value="<%= RelayState %>">
-                <noscript>
-                    <p>
-                        Script is disabled. Click Submit to continue.
-                    </p>
-                    <input type="submit" value="Submit">
-                </noscript>
-            </form>
+        asyncAssertions.forEach(function (assertion, i) {
+            return $.ajax({
+                type: 'POST',
+                url: assertion.acsUrl,
+                data: $(form).serialize(),
+                crossDomain: true,
+                xhrFields: {
+                    withCredentials: true
+                }
+            })
+        });
 
-
-            <script language="javascript" type="text/javascript">
-                var form = document.forms[document.forms.length - 1];
-                var asyncAssertions = <%- JSON.stringify(asyncAssertions) %>;
-
-                asyncAssertions.forEach(function (assertion, i) {
-                    return document.forms[i].submit();
-                });
-
-                var timeoutPeriod = 100 * asyncAssertions.length;
-
-                window.setTimeout(function () { form.submit(); }, timeoutPeriod);
-            </script>
+        var timeoutPeriod = 100 * asyncAssertions.length;
+        window.setTimeout(function () { form.submit(); }, timeoutPeriod);
+    </script>
 </body>
 
 </html>
