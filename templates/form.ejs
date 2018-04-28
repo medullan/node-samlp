@@ -24,18 +24,21 @@
     <script language="javascript" type="text/javascript">
         var form = document.forms[0];
         var asyncAssertions = <%- JSON.stringify(asyncAssertions) %>;
+        var action = '<%= action %>';
 
-        asyncAssertions.forEach(function (assertion, i) {
-            return $.ajax({
-                type: 'POST',
-                url: assertion.acsUrl,
-                data: $(form).serialize(),
-                crossDomain: true,
-                xhrFields: {
-                    withCredentials: true
-                }
-            })
-        });
+        if (action === 'login') {
+            asyncAssertions.forEach(function (assertion, i) {
+                return $.ajax({
+                    type: 'POST',
+                    url: assertion.acsUrl,
+                    data: $(form).serialize(),
+                    crossDomain: true,
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                })
+            });
+        }
 
         var timeoutPeriod = 400 * asyncAssertions.length;
         window.setTimeout(function () { form.submit(); }, timeoutPeriod);
